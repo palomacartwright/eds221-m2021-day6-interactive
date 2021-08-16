@@ -1,0 +1,62 @@
+---
+title: "Tidying data"
+author: "Paloma Cartwright"
+date: "16/08/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+```
+
+Read in the wb_indicators.csv file, make sure to specify `na = c("..", "")`
+
+```{r}
+
+wb_indicators <- read_csv(here("data", "wb_indicators.csv"), na = c("..", ""))
+
+wb_indicators_long <- wb_indicators %>%
+  pivot_longer(cols = '2001 [YR2001]':'2020 [YR2020]',
+               names_to = "year",
+               values_to = "indicator_value")
+
+wb_indicators_sep <- wb_indicators_long %>% 
+  separate(col = year, 
+           into = c("year", "year_chr"),
+           sep = " ") %>% 
+  select(-year_chr, -'Country Code', -'Series Code')
+
+
+
+wb_indicators_tidy <- wb_indicators_sep %>%
+  drop_na('Series Name') %>% 
+  pivot_wider(names_from = 'Series Name',
+              values_from = indicator_value)
+
+names(wb_indicators_tidy) <- c("country", "year", "access_clean_fuels", 
+                               "access_electricity", "co2_eissions", 
+                               "fossil_fuel_cons", "water_stress")
+
+wb_indicators_tidy <- wb_indicators_tidy %>% 
+  rename(electricity = access_electricity)
+
+```
+
+```{r}
+
+df <- tribble(
+  ~name, ~A, ~B, ~C,
+  "teddy", 4, 5, 6, 
+  "khora", 9, 10, 11
+)
+df
+
+df_long <- df %>% 
+  pivot_longer(-name, names_to = "dog food", values_to = "quantity")
+
+df_back <- df_long %>% 
+  pivot_wider(names_from = `dog food`, values_from = quantity)
+```
+
